@@ -5,7 +5,6 @@ import jetson.utils # type: ignore
 import PySimpleGUI as gui
 import argparse
 import sys
-
 # parse the command line
 parser = argparse.ArgumentParser(description="Classify objects in a video feed and get information about them", formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.detectNet.Usage() +jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
 
@@ -24,9 +23,9 @@ except:
 gui.theme("DarkGrey11")
 layout = [
     [gui.Text("Initializing")],
-    [gui.ProgressBar(2, orientation="h")],
+    [gui.ProgressBar(2, orientation="h", size=(20, 20))],
     ]
-window = gui.Window("OptiClass GUI", layout)
+window = gui.Window("OptiClass GUI", layout, finalize=True)
 
 # load the specified network
 net = jetson.inference.detectNet(opt.network, sys.argv, opt.threshold)
