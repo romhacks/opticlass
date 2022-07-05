@@ -2,7 +2,7 @@
 # ignore linting for nvidia libs because dev environment won't always have all the modules
 import jetson.inference # type: ignore
 import jetson.utils # type: ignore
-import pysimplegui as gui # type: ignore
+import PySimpleGUI as gui
 import argparse
 import sys
 
