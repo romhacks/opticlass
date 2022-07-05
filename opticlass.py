@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-# ignore linting for nvidia libs because dev environment won't always have all the modules
-import jetson.inference # type: ignore
-import jetson.utils # type: ignore
 import PySimpleGUI as gui
 import argparse
 import sys
+
+# setup the window
+gui.theme("DarkGrey11")
+layout = [
+    [gui.Text("Initializing")],
+    [gui.ProgressBar(4, orientation="h", size=(20, 20))],
+    ]
+window = gui.Window("OptiClass GUI", layout, finalize=True)
+
+# ignore linting for nvidia libs because dev environment won't always have all the modules
+import jetson.inference # type: ignore
+import jetson.utils # type: ignore
+window[0].update(1)
+
 # parse the command line
 parser = argparse.ArgumentParser(description="Classify objects in a video feed and get information about them", formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.detectNet.Usage() +jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
 
@@ -19,18 +30,12 @@ except:
         parser.print_help()
         sys.exit(0)
 
-# setup the window
-gui.theme("DarkGrey11")
-layout = [
-    [gui.Text("Initializing")],
-    [gui.ProgressBar(2, orientation="h", size=(20, 20))],
-    ]
-window = gui.Window("OptiClass GUI", layout, finalize=True)
+window[0].update(2)
 
 # load the specified network
 net = jetson.inference.detectNet(opt.network, sys.argv, opt.threshold)
-window[0].update(1)
+window[0].update(3)
 
 # create the video source
 input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
-window[0].update(2)
+window[0].update(4)
