@@ -48,12 +48,6 @@ list_player = inst.media_list_player_new()
 media_list = inst.media_list_new([])
 list_player.set_media_list(media_list)
 player = list_player.get_media_player()
-player.set_xwindow(window['-WEBCAM-'].Widget.winfo_id())
-media_list.add_media("rtp://127.0.0.1:1234")
-list_player.set_media_list(media_list)
-window[0].update(5)
-
-window.close()
 
 # setup the main window
 layout = [
@@ -62,6 +56,15 @@ layout = [
 ]
 
 window['-WEBCAM-'].expand(True, True) # resize video window to fill space
+
+player.set_xwindow(window['-WEBCAM-'].Widget.winfo_id())
+media_list.add_media("rtp://127.0.0.1:1234")
+list_player.set_media_list(media_list)
+window[0].update(5)
+
+window.close()
+
+window = gui.Window("OptiClass GUI", layout, finalize=True)
 
 while True:
 	# capture the next image
