@@ -54,10 +54,6 @@ layout = [
     [gui.Text("OptiClass")],
     [gui.Image('', size=(300, 170), key='-WEBCAM-')],
 ]
-
-window['-WEBCAM-'].expand(True, True) # resize video window to fill space
-
-player.set_xwindow(window['-WEBCAM-'].Widget.winfo_id())
 media_list.add_media("rtp://127.0.0.1:1234")
 list_player.set_media_list(media_list)
 window[0].update(5)
@@ -65,6 +61,8 @@ window[0].update(5)
 window.close()
 
 window = gui.Window("OptiClass GUI", layout, finalize=True)
+window['-WEBCAM-'].expand(True, True) # resize video window to fill space
+player.set_xwindow(window['-WEBCAM-'].Widget.winfo_id()) 
 
 while True:
 	# capture the next image
