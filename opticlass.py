@@ -2,12 +2,13 @@
 import PySimpleGUI as gui
 import argparse
 import sys
+import vlc
 
-# setup the window
+# setup the loading window
 gui.theme("DarkGrey11")
 layout = [
     [gui.Text("Initializing")],
-    [gui.ProgressBar(4, orientation="h", size=(20, 20))],
+    [gui.ProgressBar(5, orientation="h", size=(20, 20))],
     ]
 window = gui.Window("OptiClass GUI", layout, finalize=True)
 
@@ -39,3 +40,22 @@ window[0].update(3)
 # create the video source
 input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
 window[0].update(4)
+
+# create the vlc instance and player
+inst = vlc.Instance()
+list_player = inst.media_list_player_new()
+media_list = inst.media_list_new([])
+list_player.set_media_list(media_list)
+player = list_player.get_media_player()
+player.set_xwindow(window['-VID_OUT-'].Widget.winfo_id())
+window[0].update(5)
+
+window.close()
+
+# setup the main window
+layout = [
+    [gui.Text("OptiClass")],
+    [gui.Image('', size=(300, 170), key='-WEBCAM-')],
+]
+
+window['-WEBCAM-'].expand(True, True) # resize video window to fill space
