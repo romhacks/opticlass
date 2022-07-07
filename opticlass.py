@@ -28,55 +28,48 @@ parser.add_argument("--network", type=str, default="ssd-mobilenet-v2", help="pre
 parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
 parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
 
-try:
-        opt = parser.parse_known_args()[0]
-except:
-        print("")
-        parser.print_help()
-        sys.exit(0)
-
 is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
-window[0].update(2)
+try:
+	opt = parser.parse_known_args()[0]
+except:
+	print("")
+	parser.print_help()
+	sys.exit(0)
 
+# create video output object 
 output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
 	
 # load the object detection network
 net = jetson.inference.detectNet(opt.network, sys.argv, opt.threshold)
-window[0].update(3)
 
 # create video sources
 input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
-window[0].update(4)
 
-# create the vlc instance and player
-'''
-inst = vlc.Instance()
-list_player = inst.media_list_player_new()
-media_list = inst.media_list_new([])
-list_player.set_media_list(media_list)
-player = list_player.get_media_player()
-'''
-# setup the main window
-layout = [
-    [gui.Text("OptiClass")],
-    [gui.Image('', size=(300, 170), key='-WEBCAM-')],
-]
-'''
-media_list.add_media("rtp://127.0.0.1:1234")
-list_player.set_media_list(media_list)
-window[0].update(5)
-'''
-window.close()
 
-window = gui.Window("OptiClass GUI", layout, finalize=True)
-window['-WEBCAM-'].expand(True, True) # resize video window to fill space
-"player.set_xwindow(window['-WEBCAM-'].Widget.winfo_id())"
-
+# process frames until the user exits
 while True:
 	# capture the next image
-    img = input.Capture()
+	img = input.Capture()
 
 	# detect objects in the image (with overlay)
-    detections = net.Detect(img, overlay=opt.overlay)
-    output.Render(img)  
+	detections = net.Detect(img, overlay=opt.overlay)
+
+	# print the detections
+	print("detected {:d} objects in image".format(len(detections)))
+
+	for detection in detections:
+		print(detection)
+
+	# render the image
+	output.Render(img)
+
+	# update the title bar
+	output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
+
+	# print out performance info
+	net.PrintProfilerTimes()
+
+	# exit on input/output EOS
+	if not input.IsStreaming() or not output.IsStreaming():
+		break
