@@ -20,12 +20,22 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 #
-
-import jetson.inference
-import jetson.utils
-
+import PySimpleGUI as gui
 import argparse
 import sys
+
+# setup the loading window
+gui.theme("DarkGrey11")
+layout = [
+    [gui.Text("Initializing")],
+    [gui.ProgressBar(3, orientation="h", size=(20, 20))],
+    ]
+window = gui.Window("OptiClass GUI", layout, finalize=True)
+
+import jetson.inference # type: ignore
+import jetson.utils # type: ignore
+
+window[0].update(1)
 
 # parse the command line
 parser = argparse.ArgumentParser(description="Locate objects in a live camera stream using an object detection DNN.", 
@@ -47,6 +57,8 @@ except:
 	parser.print_help()
 	sys.exit(0)
 
+window[0].update(2)
+
 # create video output object 
 output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
 	
@@ -56,6 +68,8 @@ net = jetson.inference.detectNet(opt.network, sys.argv, opt.threshold)
 # create video sources
 input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
 
+window[0].update(3)
+window.close()
 
 # process frames until the user exits
 while True:
@@ -78,7 +92,7 @@ while True:
 	output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
 
 	# print out performance info
-	net.PrintProfilerTimes()
+	#net.PrintProfilerTimes()
 
 	# exit on input/output EOS
 	if not input.IsStreaming() or not output.IsStreaming():
