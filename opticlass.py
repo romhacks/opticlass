@@ -80,6 +80,7 @@ while True:
 
 		# print the detections
 		print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
+		window["-DESC-"].update(class_desc)
 		i = 0
 
 	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
@@ -87,7 +88,6 @@ while True:
 	bio = io.BytesIO()
 	img.save(bio, format="PNG") # slow as shit but seems to be the only way to make gui behave
 	window["-WEBCAM-"].update(data=bio.getvalue())
-	window["-DESC-"].update(class_desc)
 
 	# exit on input/output EOS
 	if not input.IsStreaming():
