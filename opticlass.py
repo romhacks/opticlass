@@ -60,6 +60,7 @@ window = gui.Window("OptiClass GUI", layout, finalize=True)
 #window['-WEBCAM-'].expand(True, True) # resize video window to fill space
 
 # main event loop
+i = 0
 while True:
 	event, values = window.read(timeout=0)
 	print(event, values)
@@ -72,12 +73,14 @@ while True:
 	img = input.Capture()
 	window.refresh()
 
-	# classify the captured image
-	class_idx, confidence = net.Classify(img)
-	class_desc = net.GetClassDesc(class_idx).partition(",")[0] # we only want the first name of the class
+	if i == 10: # save cycles by only running this every 10 frames
+		# classify the captured image
+		class_idx, confidence = net.Classify(img)
+		class_desc = net.GetClassDesc(class_idx).partition(",")[0] # we only want the first name of the class
 
-	# print the detections
-	print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
+		# print the detections
+		print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
+		i = 0
 
 	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
 	img.thumbnail((250,250)) # resize image to fit in window
@@ -89,3 +92,4 @@ while True:
 	# exit on input/output EOS
 	if not input.IsStreaming():
 		break
+	i += 1
