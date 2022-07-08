@@ -61,6 +61,7 @@ window = gui.Window("OptiClass GUI", layout, finalize=True)
 
 # main event loop
 i = 0
+past = 0
 while True:
 	event, values = window.read(timeout=0)
 	print(event, values)
@@ -80,7 +81,10 @@ while True:
 
 		# print the detections
 		print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
-		window["-DESC-"].update(class_desc)
+
+		if past == class_idx: # rudimentary smoothing by requiring two consecutive detections to be the same
+			window["-DESC-"].update(class_desc)
+		past = class_idx
 		i = 0
 
 	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
