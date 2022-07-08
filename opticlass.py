@@ -5,7 +5,6 @@ import argparse
 import sys
 from PIL import Image
 import io
-import numpy as np # lmao
 
 # setup the loading window
 gui.theme("DarkGrey11")
@@ -75,13 +74,12 @@ while True:
 
 	# classify the captured image
 	class_idx, confidence = net.Classify(img)
-	class_desc = net.GetClassDesc(class_idx)
+	class_desc = net.GetClassDesc(class_idx).partition(",")[0] # we only want the first name of the class
 
 	# print the detections
 	print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
 
-	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # we literally only use numpy for this one line and immediately convert it to PIL
-	img.thumbnail((400,400))
+	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
 	bio = io.BytesIO()
 	img.save(bio, format="PNG") # slow as shit but seems to be the only way to make gui behave
 	window["-WEBCAM-"].update(data=bio.getvalue())
