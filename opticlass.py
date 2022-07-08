@@ -50,8 +50,12 @@ window.close()
 
 # setup the main window
 layout = [
-    [gui.Text("OptiClass", key = "-DESC-")],
-    [gui.Image('', size=(250,250), key="-WEBCAM-")],
+    [gui.Text("OptiClass GUI")],
+    [
+		gui.Image('', size=(250,250), key="-WEBCAM-"), 
+		gui.Text("Image is recognized as:"), 
+		gui.Text("", key = "-DESC-")
+	],
 ]
 
 window = gui.Window("OptiClass GUI", layout, finalize=True)
@@ -90,7 +94,7 @@ while True:
 		past = class_idx
 		i = 0
 
-	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
+	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to array then to PIL image
 	img.thumbnail((250,250)) # resize image to fit in window
 	bio = io.BytesIO()
 	img.save(bio, format="PNG") # slow as shit but seems to be the only way to make gui behave
