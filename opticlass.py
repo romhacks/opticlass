@@ -22,8 +22,7 @@ window[0].update(1)
 
 # parse the command line
 parser = argparse.ArgumentParser(description="Provide context for images determined from a video stream", 
-                                 formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.detectNet.Usage() +
-                                 jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
+                                 formatter_class=argparse.RawTextHelpFormatter)
 
 parser.add_argument("input_URI", type=str, default="", nargs='?', help="URI of the input stream")
 parser.add_argument("--network", type=str, default="googlenet", help="pre-trained model to load (see below for options)")
