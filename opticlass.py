@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
-    "input_URI", type=str, default="", nargs="?", help="URI of the input stream"
+    "input_URI", type=str, default="/dev/video0", nargs="?", help="URI of the input stream"
 )
 parser.add_argument(
     "--network",
