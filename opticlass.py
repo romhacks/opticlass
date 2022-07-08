@@ -1,34 +1,18 @@
 #!/usr/bin/env python3
-#
-# Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-#
+
 import PySimpleGUI as gui
 import argparse
 import sys
+from time import sleep
+from PIL import Image
+import io
+import numpy as np
 
 # setup the loading window
 gui.theme("DarkGrey11")
 layout = [
     [gui.Text("Initializing")],
-    [gui.ProgressBar(3, orientation="h", size=(20, 20))],
+    [gui.ProgressBar(4, orientation="h", size=(20, 20))],
     ]
 window = gui.Window("OptiClass GUI", layout, finalize=True)
 
@@ -59,41 +43,55 @@ except:
 
 window[0].update(2)
 
-# create video output object 
-output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
-	
-# load the object detection network
-net = jetson.inference.detectNet(opt.network, sys.argv, opt.threshold)
+# load the recognition network
+net = jetson.inference.imageNet("googlenet")
 
 # create video sources
 input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
-
 window[0].update(3)
+
+# capture the first frame to get the camera pipeline going
+img = input.Capture()
+window[0].update(4)
+
 window.close()
+
+# setup the main window
+layout = [
+    [gui.Text("OptiClass", key = "-DESC-")],
+    [gui.Image('', size=(300, 170), key="-WEBCAM-")],
+]
+
+window = gui.Window("OptiClass GUI", layout, finalize=True)
+#window['-WEBCAM-'].expand(True, True) # resize video window to fill space
 
 # process frames until the user exits
 while True:
+	event, values = window.read(timeout=0)
+	print(event, values)
+
+	# stop evaluating if window closed
+	if event == gui.WIN_CLOSED:
+		break
+
 	# capture the next image
 	img = input.Capture()
+	window.refresh()
 
-	# detect objects in the image (with overlay)
-	detections = net.Detect(img, overlay=opt.overlay)
+	#classify
+	class_idx, confidence = net.Classify(img)
+	class_desc = net.GetClassDesc(class_idx)
 
 	# print the detections
-	print("detected {:d} objects in image".format(len(detections)))
+	print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
 
-	for detection in detections:
-		print(detection)
-
-	# render the image
-	output.Render(img)
-
-	# update the title bar
-	output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
-
-	# print out performance info
-	#net.PrintProfilerTimes()
+	img = Image.fromarray(jetson.utils.cudaToNumpy(img))
+	img.thumbnail((400,400))
+	bio = io.BytesIO()
+	img.save(bio, format="PNG")
+	window["-WEBCAM-"].update(data=bio.getvalue())
+	window["-DESC-"].update(class_desc)
 
 	# exit on input/output EOS
-	if not input.IsStreaming() or not output.IsStreaming():
+	if not input.IsStreaming():
 		break
