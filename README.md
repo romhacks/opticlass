@@ -26,4 +26,4 @@ If you have issues getting the window to show, run `export DISPLAY=:0` prior to 
 
 ## Video
 
-A video demonstration of the setup and program can be seen [here](https://example.com).
+A video demonstration of the setup and program can be seen [here](https://youtu.be/j2smVsMT-vo).
