@@ -64,7 +64,6 @@ i = 0
 past = 0
 while True:
 	event, values = window.read(timeout=0)
-	print(event, values)
 
 	# stop evaluating if window closed
 	if event == gui.WIN_CLOSED:
