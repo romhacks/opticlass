@@ -10,8 +10,6 @@ import threading
 import wikipedia
 import textwrap as tr
 
-from numpy import append
-
 # setup the loading window
 gui.theme("DarkGrey11")
 layout = [
