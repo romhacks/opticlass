@@ -80,6 +80,7 @@ while True:
 	print("image is recognized as '{:s}' (class #{:d}) with {:f}% confidence".format(class_desc, class_idx, confidence * 100))
 
 	img = Image.fromarray(jetson.utils.cudaToNumpy(img)) # convert cudaimage to numpy array then to PIL image
+	img.thumbnail((400,400)) # resize image to fit in window
 	bio = io.BytesIO()
 	img.save(bio, format="PNG") # slow as shit but seems to be the only way to make gui behave
 	window["-WEBCAM-"].update(data=bio.getvalue())
