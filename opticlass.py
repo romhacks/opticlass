@@ -49,12 +49,17 @@ window[0].update(4)
 window.close()
 
 # setup the main window
+classOut = [
+	[gui.Text("Image is recognized as:")],
+	[gui.Text("", key="-DESC-")],
+	[gui.Button("Dummy Button", key="-BUTTON-")],
+]
+
 layout = [
     [gui.Text("OptiClass GUI")],
     [
 		gui.Image('', size=(250,250), key="-WEBCAM-"), 
-		gui.Text("Image is recognized as:"), 
-		gui.Text("", key = "-DESC-")
+		gui.Column(classOut),
 	],
 ]
 
