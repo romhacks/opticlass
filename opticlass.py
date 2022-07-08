@@ -62,6 +62,7 @@ window = gui.Window("OptiClass GUI", layout, finalize=True)
 # main event loop
 i = 0
 past = 0
+threshold = 10
 while True:
 	event, values = window.read(timeout=0)
 
@@ -73,7 +74,7 @@ while True:
 	img = input.Capture()
 	window.refresh()
 
-	if i == 10: # save cycles by only running this every 10 frames
+	if i == threshold: # save cycles by only running this every 10 frames
 		# classify the captured image
 		class_idx, confidence = net.Classify(img)
 		class_desc = net.GetClassDesc(class_idx).partition(",")[0] # we only want the first name of the class
@@ -83,6 +84,9 @@ while True:
 
 		if past == class_idx: # rudimentary smoothing by requiring two consecutive detections to be the same
 			window["-DESC-"].update(class_desc)
+			threshold = 10
+		else:
+			threshold = 2 # boost inference speed if the class changes
 		past = class_idx
 		i = 0
 
